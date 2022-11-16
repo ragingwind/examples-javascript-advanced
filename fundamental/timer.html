@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>timer</title>
+  </head>
+  <body>
+    <button id="button">click</button>
+    <div>debounce <label id="debounce">0</label></div>
+    <div>throttle <label id="throttle">0</label></div>
+    <script>
+      {
+        const debounce = function (handler, delay) {
+          let tid;
+
+          return () => {
+            if (tid) {
+              clearTimeout(tid);
+            }
+
+            tid = setTimeout(() => {
+              handler();
+            }, delay);
+          };
+        };
+
+        const throttle = function (handler, delay) {
+          let tid;
+
+          return () => {
+            if (tid) {
+              return;
+            }
+
+            tid = setTimeout(() => {
+              handler();
+              tid = null;
+            }, delay);
+          };
+        };
+
+        document.querySelector('#button').addEventListener(
+          'click',
+          debounce(() => {
+            document.querySelector('#debounce').textContent =
+              +document.querySelector('#debounce').textContent + 1;
+          }, 500)
+        );
+
+        document.querySelector('#button').addEventListener(
+          'click',
+          throttle(() => {
+            document.querySelector('#throttle').textContent =
+              +document.querySelector('#throttle').textContent + 1;
+          }, 1000)
+        );
+      }
+    </script>
+  </body>
+</html>

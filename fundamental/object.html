@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>function</title>
+  </head>
+  <body>
+    <script>
+      // __proto__ accessor property
+      {
+        const obj = {
+          name: 'obj',
+        };
+
+        // returns object's [[Prototype]]
+        console.log(obj.__proto__ === Object.prototype); // true
+        console.log('hasOwnProperty', Object.hasOwnProperty('name')); // true
+        console.log('hasOwnProperty', Object.hasOwnProperty('__proto__')); // false
+
+        // __proto__ is the prototype of the object
+        console.log('__proto__', function () {}.hasOwnProperty('__proto__')); // false
+        // prototype is only exist in constructor object
+        console.log('constructor', function () {}.hasOwnProperty('prototype')); // true
+        console.log('non-constructor', {}.hasOwnProperty('prototype')); // false
+      }
+      // function - this
+      {
+        function Circle() {
+          // the instance of Circle created and bind to this
+          console.log(this); // Circle {}
+
+          this.radius = 1;
+          this.draw = function () {
+            console.log('draw');
+            return this.radius;
+          };
+        }
+
+        const c = new Circle();
+        console.log(c.radius);
+        console.log(c.draw());
+      }
+      {
+        // inner slots and methods
+        // [[Environment]], [[FormalParameters]]
+        function Circle() {}
+        Circle(); // call [[Call]]: Circle()
+        new Circle(); // call [[Construct]]: Circle()
+
+        try {
+          const arrow = () => {};
+          new arrow(); // TypeError: arrow is not a constructor
+        } catch (e) {
+          console.log(e);
+        }
+
+        try {
+          const obj = {
+            x() {},
+          };
+          new obj.x(); // TypeError: obj.x is not a constructor
+        } catch (e) {
+          console.log(e);
+        }
+
+        // check if a function is a constructor
+        function CircleForNew() {
+          if (!new.target) {
+            console.log('call [[Call]]');
+            return new CircleForNew();
+          }
+          console.log('call [[Constructor]]');
+        }
+
+        CircleForNew();
+        new CircleForNew();
+      }
+
+      // fist class citizen
+      {
+        // function can be created at runtime (dynamic) as literal
+        // function can be assigned to a variable
+        const add = new Function('a', 'b', 'return a + b');
+        const minus = function (a, b) {
+          return a - b;
+        };
+
+        // function can be passed as an argument to another function
+        function callFn(fn) {
+          return fn(1, 2);
+        }
+
+        // callFn is high order function
+        console.log('call fn', callFn(add));
+
+        // function can be returned from a function
+        function createFn() {
+          return function (a, b) {
+            return a * b;
+          };
+        }
+
+        const multiply = createFn();
+        console.log('call fn', callFn(multiply));
+
+        // function can be assigned to a property of an object
+        const obj = {
+          add: add,
+          minus: minus,
+          multiply: multiply,
+        };
+
+        console.log(obj.add(1, 2));
+        console.log(obj.minus(1, 2));
+        console.log(obj.multiply(1, 2));
+      }
+
+      // object property
+      {
+        function square(x) {
+          return x * x;
+        }
+
+        console.dir(square);
+
+        // arguments: { value: null, writable: false, enumerable: false, configurable: false }
+        // caller: { value: null, writable: false, enumerable: false, configurable: false }
+        // length: { value: 1, writable: false, enumerable: false, configurable: true }
+        // name: { value: 'square', writable: false, enumerable: false, configurable: true }
+        // prototype: { value: {… }, writable: true, enumerable: false, configurable: false }
+        // [[Prototype]]: Object
+        console.log(Object.getOwnPropertyDescriptors(square));
+
+        // __proto__ is not a property of object
+        console.log(
+          Object.getOwnPropertyDescriptor(square, '__proto__') === undefined
+        );
+
+        // __proto__ and toString, is derived from [[Prototype]] Object
+        console.log(
+          Object.getOwnPropertyDescriptor(Object.prototype, '__proto__')
+        );
+        console.log(square.toString());
+      }
+
+      // arguments object of function
+      {
+        function sum() {
+          let total = 0;
+          for (let value of arguments) {
+            total += value;
+          }
+          return total;
+        }
+
+        console.log(sum(1, 2, 3, 4, 5));
+
+        function multiply(x, y) {
+          const itr = arguments[Symbol.iterator]();
+
+          console.log(itr.next()); // { value: 1, done: false }
+          console.log(itr.next()); // { value: 2, done: false }
+          console.log(itr.next()); // { value: 3, done: false }
+          console.log(itr.next()); // { value: undefined, done: true }
+
+          return x * y;
+        }
+
+        console.log(multiply(1, 2, 3));
+      }
+
+      // rest operator
+      {
+        function sum(...args) {
+          let total = 0;
+          for (let value of args) {
+            total += value;
+          }
+          return total;
+        }
+
+        console.log(sum(1, 2, 3, 4, 5));
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,69 @@
+<!-- 
+  document type to trigger the browser render html in 
+  standards mode of quirks mode
+  https://developer.mozilla.org/en-US/docs/Web/HTML/Quirks_Mode_and_Standards_Mode
+-->
+<!DOCTYPE html>
+<!-- 
+  lang attribute to specify the language of the document
+  https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>html</title>
+    <!-- putting link is head leads HTML and CSS are being parsed simulaneously -->
+    <!-- to alllow for a quick 'first meaningful paint' timing -->
+    <link rel="stylesheet" href="styles/main.css" />
+  </head>
+  <!-- fetched in parallel to HTML parsing and executed when the page has finished parsing -->
+  <script defer type="text/javascript" src="./scripts/script-defer.js"></script>
+  <!-- fetched in parallel to HTML parsing and executed as soon as it's available -->
+  <script async type="text/javascript" src="./scripts/script-async.js"></script>
+  <body>
+    <!-- 
+      data- attribute to store custom data private to the page or application
+    -->
+    <div id="id" data-id="id">id</div>
+    <!--
+      srcset attribute to provide the user agent with a set of images
+      the browsers to display the images depending on the client's resolution
+      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-srcset
+    -->
+    <img
+      srcset="./images/1x.png 500w, ./images/2x.png 800w"
+      src="./images/3x.png"
+      alt="image"
+    />
+  </body>
+  <!-- script blocks HTML parsing, allow HTML to be parsed and displayed to the user first -->
+  <!-- HTML pasing is block, fetched and executed immediately -->
+  <script type="text/javascript" src="./scripts/script.js"></script>
+  <script>
+    document.addEventListener('load', () => {
+      console.log('load');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded');
+    });
+    // HTTP Set-Cookie header, manually set and delete cookie.
+    // cookie can be sent via Cooke heeader, capacity is 4kb per domain.
+    // any window can asscess cookie, but can only be set by the window that
+    // created it.
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+    document.cookie = 'name=cookie';
+
+    // localStorage, persist data in the browser, capacity is 5mb per domain.
+    // any window can access localStorage, but can only be set by the window
+    // that created it.
+    localStorage.setItem('name', 'localStorage');
+
+    // sessionStorage, until tab closed. capacity is 5mb per domain.
+    // any window can access sessionStorage, but can only be set by the window
+    // that created it.
+    sessionStorage.setItem('name', 'sessionStorage');
+  </script>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>function</title>
+  </head>
+  <body>
+    <script>
+      // `this` is the self referencing varable to refe to
+      {
+        const obj = {
+          name: 'obj',
+          getName() {
+            // this refer to the object itself
+            return this.name;
+          },
+        };
+
+        function fn() {
+          // this refer to the current instance which will create by fucntion constructor
+          this.name = 'fn';
+        }
+      }
+
+      // lexical scope is determined at the time of decalration of function
+      {
+        console.log('globa', this); // global object, Window
+
+        const fn = function () {
+          // nested function binding to Window
+          function nested() {
+            console.log('nested', this); // Window
+          }
+
+          nested();
+
+          // called with new operator
+          if (new.target) {
+            console.log('called with new operator, this is an instance', this);
+            const that = this;
+
+            setTimeout(function () {
+              console.log('this in timer fn', this);
+              console.log('that in timer fn', that);
+            }, 100);
+
+            setTimeout(() => {
+              console.log('this in arrow fn', this);
+            }, 100);
+
+            setTimeout(
+              function () {
+                console.log('this in timer fn binded', this);
+              }.bind(this),
+              100
+            );
+          } else {
+            console.log('called as function, this is global', this);
+          }
+        };
+
+        fn.prototype.size = function (size) {
+          // this refer to the current instance
+          console.log('this in size', size, this);
+        };
+
+        fn(); // Window
+        const f = new fn(); // fn {}, this is the instance of fn created by constructor
+        f.size(3); // fn {}
+
+        fn.prototype.size.call(this, 4); // Window 4
+        fn.prototype.size.apply(f, [1]); // fn{} 1
+
+        // general function call binding to global object but not in strict mode
+        const fn_stric = function () {
+          'use strict';
+          console.log('this in strict', this === undefined); // undefined
+        };
+
+        fn_stric();
+      }
+    </script>
+  </body>
+</html>

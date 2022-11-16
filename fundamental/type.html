@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>type</title>
+  </head>
+  <body>
+    <script>
+      // type coercion
+      // automatic or implicit conversion of values from other data type to another
+      console.log('10' + 1); // '101'
+      console.log('10' - 1); // 9
+      console.log('10' * 1); // 10
+      console.log('10' / 1); // 10
+      console.log(!0); // true
+      console.log(!1); // false
+      console.log(!!0); // false
+      console.log(!!1); // true
+      console.log('cat' && 'dog'); // dog
+      console.log('cat' || 'dog'); // cat
+      console.log('cat' ?? 'dog'); // cat
+
+      // optional chaining operator
+      // return undefined if elem is null or undefined
+      const elem = null;
+      console.log(elem?.value); // undefined
+    </script>
+  </body>
+</html>

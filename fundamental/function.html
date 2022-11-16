@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>function</title>
+  </head>
+  <body>
+    <script>
+      // function - this
+      function This() {
+        console.log(this); // Window
+      }
+
+      This();
+
+      const arrowFn = () => {
+        console.log(this); // Window
+      };
+
+      arrowFn();
+
+      class ThisClass {
+        constructor() {
+          console.log(this); // ThisClass
+        }
+      }
+
+      const thisClass = new ThisClass();
+
+      const obj = {
+        name: 'obj',
+        This: function () {
+          console.log(this); // obj
+        },
+        arrowFn: () => {
+          console.log(this); // Window
+        },
+        ThisClass: class {
+          constructor() {
+            console.log(this); // thisClass
+          }
+        },
+      };
+
+      obj.This();
+      obj.arrowFn();
+      new obj.ThisClass();
+
+      // IIFE, Immediately Invoked Function Expression
+      (() => {
+        console.log(this); // Window
+      })();
+    </script>
+  </body>
+</html>

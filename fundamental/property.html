@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>propery</title>
+  </head>
+  <body>
+    <script>
+      // internal slots / methods are pseudo properties.
+      // internal methods that spec uses to define the behavior of the method
+      // internal slots that spec uses to store the state of the object
+      // but not accessible to the user code
+      try {
+        // every object has [[Prototype]] as a internal slot
+        const o = {};
+        // o.[[Prototype]] === String.prototype
+        // ___proto___ is a property accessor for [[Prototype]]
+        console.log(o.__proto__);
+
+        const s = new String('what');
+        console.log(s.__proto__ === String.prototype);
+
+        // we can access [[StringData]] by String.prototype.toString()
+        console.log(s.toString());
+        console.log(String.prototype.toString.call(s));
+        console.log(String.prototype.toString.apply(s));
+      } catch (error) {
+        console.log(error);
+      }
+
+      // property attribute
+      {
+        const o = {
+          _type: 'Object',
+
+          get type() {
+            return 'Object';
+          },
+
+          set type(value) {
+            this._type = value;
+          },
+        };
+
+        // data property
+        // {
+        //   value: "Object",  // [[Value]]
+        //   writable: true,  // [[Writable]]
+        //   enumerable: true,  // [[Enumerable]]
+        //   configurable: true // [[Configurable]]
+        // }
+        console.log(Object.getOwnPropertyDescriptor(o, '_type'));
+
+        // accessor property
+        // {
+        //   enumerable: true, // [[Enumerable]]
+        //   configurable: true, // [[Configurable]]
+        //   get: ƒ, // [[Get]]
+        //   set: ƒ //  [[Set]]
+        // }
+        console.log(Object.getOwnPropertyDescriptor(o, 'type'));
+      }
+
+      // define property
+      {
+        const o = {};
+
+        Object.defineProperty(o, '_type', {
+          value: 'Object',
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        });
+
+        console.log(Object.getOwnPropertyDescriptor(o, '_type'));
+
+        Object.defineProperty(o, 'type', {
+          get() {
+            return this._type;
+          },
+          set(value) {
+            this._type = value;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+
+        console.log(Object.getOwnPropertyDescriptor(o, 'type'), o.type);
+      }
+
+      // property protection
+      {
+        // preventExtensions, add(x), delete(o), read(o), write(o)
+        {
+          const o = {
+            name: 'o',
+          };
+
+          Object.preventExtensions(o);
+
+          console.log('is extensible', Object.isExtensible(o));
+
+          o.age = 10;
+          console.log('no more new property', o.age === undefined);
+          delete o.name;
+          console.log('delete property', o.name === undefined);
+        }
+
+        // seal, add(x), delete(x), read(o), write(o)
+        {
+          const o = {
+            name: 'o',
+          };
+
+          Object.seal(o);
+          console.log('is sealed', Object.isSealed(o));
+
+          o.age = 10;
+          console.log('no more new property', o.age === undefined);
+          delete o.name;
+          console.log('delete property', o.name === undefined);
+        }
+        // freeze, add(x), delete(x), read(o), write(x)
+        {
+          const o = {
+            name: 'o',
+          };
+
+          Object.freeze(o);
+          console.log('is frozen', Object.isFrozen(o));
+
+          o.age = 10;
+          console.log('no more new property', o.age === undefined);
+          delete o.name;
+          console.log('delete property', o.name === undefined);
+          o.name = 'new name';
+          console.log('new value?', o.name === 'new name');
+
+          const o1 = {
+            name: 'o1',
+            innerObject: {
+              name: 'innerObject',
+            },
+          };
+
+          Object.freeze(o1);
+          console.log('is frozen', Object.isFrozen(o1));
+          console.log('is frozen', Object.isFrozen(o1.innerObject));
+        }
+      }
+    </script>
+  </body>
+</html>

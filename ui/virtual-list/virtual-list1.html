@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style>
+    .container {
+      position: relative;
+      overflow: hidden;
+      overflow-y: auto;
+      width: 300px;
+      height: 480px;
+      border: 1px solid black;
+    }
+
+    .scroller {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .view {
+      position: relative;
+      background-color: #f0f0f0;
+    }
+
+    .item {
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      border-bottom: 1px solid #dcdcdc;
+    }
+
+    .item:nth-child(odd) {
+      background-color: #fff;
+    }
+  </style>
+  <body>
+    <div class="container">
+      <div class="scroller">
+        <div class="content"></div>
+      </div>
+    </div>
+    <script>
+      function VScroll($root, maxItem, itemHeight) {
+        const { width, height } = $root.getBoundingClientRect();
+        // page per view, container height / item height, 480 / 30 = 16
+        // add extra collection value, 16 + 1 = 17
+        const pagePerView = Math.ceil(height / itemHeight) + 1;
+        // set total scrollview's height, 30000 * 30 = 900000
+        const scrollHeight = maxItem * itemHeight;
+        const viewHeight = pagePerView * itemHeight;
+
+        const $scroller = document.createElement('div');
+        $scroller.className = 'scroller';
+        $scroller.style.height = `${scrollHeight}px`;
+
+        const $view = document.createElement('div');
+        $view.className = 'view';
+        $view.style.height = `${viewHeight}px`;
+
+        $scroller.appendChild($view);
+        $root.appendChild($scroller);
+
+        const context = {
+          currentIdx: 1,
+        };
+
+        const scroll = (scrollTop, topIdx) => {
+          // scroll top position
+          $view.style.transform = `translateY(${scrollTop}px)`;
+
+          if (context.currentIdx === topIdx && topIdx !== 1) {
+            return;
+          }
+
+          context.currentIdx = topIdx;
+          // $view.removeChild();
+          $view.innerHTML = '';
+
+          for (let i = 0; i < pagePerView; i++) {
+            const $item = document.createElement('div');
+            $item.className = 'item';
+            $item.style.height = `${itemHeight}px`;
+            $item.textContent = `${topIdx + i}`;
+            $view.appendChild($item);
+          }
+        };
+
+        scroll(0, 1);
+
+        return () => {
+          // get current scroll top position
+          const scrollTop = $container.scrollTop;
+          // get itempos for starting, 300 / 30 = 10
+          const topIdx = Math.floor(scrollTop / itemHeight);
+          // calculate padding to align item top position
+          const padding = scrollTop % itemHeight;
+
+          scroll(scrollTop - padding, Math.max(topIdx + 1, 0));
+        };
+      }
+
+      const $container = document.querySelector('.container');
+      const onScroll = new VScroll($container, 3000, 30);
+
+      $container.addEventListener('scroll', onScroll);
+    </script>
+  </body>
+</html>

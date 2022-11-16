@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>variable</title>
+  </head>
+  <body>
+    <script>
+      try {
+        var a = {}; // empty object literal
+        console.log(a); // {}
+
+        // undefined: indicates that a variable has not been declared at all.
+        {
+          var a;
+        } // undefined object in a block scope
+
+        // null: represents the absence of any object value
+        var obj = null;
+        console.log(obj); // null
+
+        // var, declare a variable local and global, optionally initialzing it to a value
+        var v1 = 10;
+        console.log(v1);
+
+        if (true) {
+          var v2 = 5;
+        }
+        console.log(v2); // v2 is 5
+
+        // let, declare a block scope, local variable, optionally initializing it to a value
+        let x;
+        x = 10; // let x = 10;
+        console.log(x);
+
+        // const c; // lint error
+      } catch (e) {
+        console.log(e);
+      }
+
+      // value hoisting: use variable value in its scope before declared
+      // hoistable declaration, function, function*, async function, async function*
+      try {
+        HoistedFunction();
+        function HoistedFunction() {
+          console.log('hoisted function');
+        }
+
+        ErrorHoistedFunction(); // Uncaught TypeError: ErrorHoistedFunction is not a function
+        var ErrorHoistedFunction = function () {
+          console.log('error hoisted function');
+        };
+      } catch (e) {
+        console.log(e);
+      }
+
+      // reference hoisting: use to reference a variable in its scope before declared
+      // but the value is undefined
+      console.log('hoisted but undefined is', v3 === undefined); // true
+      var v3;
+
+      (function () {
+        console.log('var in fn', v3);
+        var v3 = 30;
+        console.log('var in fn', v3);
+      })();
+
+      // non-hoisting: variable declared before the line causes behavior changes in
+      // its scopes (global, module, function)
+
+      {
+        // not hoisting form, var declaration are not scoped to blocks
+        {
+          var x = 3;
+          console.log(this);
+        }
+        console.log(x); // 3
+
+        // let, const, class as non-hoisting, lexical declarations
+        try {
+          const x = 1;
+          {
+            console.log(x); // ReferenceError: Cannot access 'x' before initialization
+            const x = 2;
+          }
+        } catch (error) {
+          console.log(error);
+        }
+
+        // class delcaration is not hoisted
+        try {
+          new MyClass(); // ReferenceError: Cannot access 'MyClass' before initialization
+        } catch (error) {
+          console.log(error);
+        }
+
+        class MyClass {}
+      }
+    </script>
+  </body>
+</html>

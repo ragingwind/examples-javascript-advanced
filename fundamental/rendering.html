@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>rendering</title>
+  </head>
+  <style>
+    .block {
+      display: block;
+      width: 200px;
+      height: 300px;
+      background-color: red;
+    }
+  </style>
+  <body>
+    <div class="block">BLOCK</div>
+    <script>
+      // 1. HTML -> DOM Tree
+      // 2. CSS -> CSSOM Tree
+      // 3. Render Tree
+      // 4. Layout
+      // 5. Paint
+      // 6. Javascript running, then make some changes in below, will make
+      //    reflow(recalulate layout) or repaint(redraw render tree):
+      //  - Node adding or deleting by Javascript
+      //  - Resizing, viewport chaging
+      //  - HTML layout properties changed
+      //    (width, height, margin, padding, border, display, position, top/right/bottom/left, ...)
+
+      // reapint: A repaint occurs when changes are made to elements that affect visibility
+      // but not the layout. For example, opacity, background-color, visibility, and outline.
+      // Repaints are expensive because the browser must check the visibility of all other
+      // nodes in the DOM — one or more may have become visible beneath the changed element.
+
+      // reflow: Reflows have a bigger impact. This refers to the re-calculation of positions and
+      // dimensions of all elements, which leads to re-rendering part or all of the document.
+      // Changing a single element can affect all children, ancestors, and siblings.
+
+      // https://developers.google.com/speed/docs/insights/browser-reflow
+
+      document.addEventListener('DOMContentLoaded', () => {
+        setInterval(() => {
+          const display = document.querySelector('.block').style.display;
+          document.querySelector('.block').style.display =
+            display === 'none' ? 'block' : 'none';
+        }, 1000);
+      });
+    </script>
+  </body>
+</html>

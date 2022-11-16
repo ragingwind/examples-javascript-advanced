@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>propery</title>
+  </head>
+  <body>
+    <script>
+      // instance can use same method of prototype
+      {
+        function Circle() {
+          this.radius = 1;
+          this.draw = function () {
+            return this.radius;
+          };
+        }
+
+        Circle.prototype.parentDraw = function () {
+          return this.radius;
+        };
+
+        const c = new Circle();
+        const c1 = new Circle();
+        console.log('diff methods', c.draw === c1.draw); // false
+        console.dir(Circle.prototype.hasOwnProperty('draw')); // false
+
+        console.log('shared methods', c.parentDraw === c1.parentDraw); // false
+        console.dir(Circle.prototype.hasOwnProperty('parentDraw')); // true
+      }
+
+      // __proto__ and inheritance
+      {
+        const child = { lastname: 'Jhon' };
+        const parent = { familyname: 'Doe' };
+
+        // make inheritance, __proto__ direct to parent
+        child.__proto__ = parent;
+        console.log(child.lastname, child.familyname); // John Doe
+
+        // __proto__ is owned by Object.prototype
+        console.log(child.hasOwnProperty('__proto__')); // false
+        console.log(parent.hasOwnProperty('__proto__')); // false
+        console.log(Object.prototype.hasOwnProperty('__proto__')); // true
+
+        // __proto__ is uni-directional link
+        try {
+          child.__proto__ = parent;
+          parent.__proto__ = child; // TypeError: Cyclic __proto__ value
+        } catch (e) {
+          console.log(e);
+        }
+
+        // prototype of prototype is Object.prototype
+        console.log(
+          'prototype of prototype',
+          parent.__proto__ === Object.prototype
+        ); // true
+
+        // stop using __proto__ directly
+        {
+          const child = { lastname: 'Jane' };
+          const parent = { familyname: 'Doe' };
+
+          Object.setPrototypeOf(child, parent);
+
+          // lastname: "Jane"
+          // [[Prototype]]: Object
+          console.dir(child);
+
+          // familyname: "Doe"
+          // [[Prototype]]: Object
+          console.dir(Object.getPrototypeOf(child));
+
+          // get value from child instance
+          console.log(child.lastname);
+
+          // get value from child's parent, prototype
+          console.log(child.familyname);
+        }
+
+        // instance -> Child.prototype -> Object prototype
+        class Child extends Object {}
+        console.log(new Child()); // Child {}
+      }
+
+      // constructor property
+      {
+        function Circle() {}
+        console.log(Circle.constructor === Function); // true
+
+        const c = new Circle();
+        console.log(c.constructor); // [Function: Circle]
+        console.log(c.constructor === Circle); // true
+        console.log(c.constructor === Object); // false
+      }
+
+      // constructor and prototype
+      {
+        // constructor and prototype are only exist in constructor function
+        console.log(Circle.prototype);
+        function Circle() {} // {constructor: f}
+
+        const Rect = function () {};
+        console.log(Rect.prototype); // {constructor: f}
+
+        const Triangle = () => {};
+        console.log(Triangle.prototype); // undefined
+      }
+
+      // how to create object
+      {
+        // object literal
+        const obj = {
+          prop1: 'value1',
+          prop2: 'value2',
+        };
+
+        // object constructor
+        const obj2 = new Object();
+        obj2.value = 1;
+
+        // constructor function
+        function Shape() {
+          this.x = 0;
+          this.y = 0;
+        }
+
+        Shape.prototype.move = function (x, y) {
+          this.x += x;
+          this.y += y;
+          console.info('Shape moved.');
+        };
+
+        const s = new Shape();
+        s.move(1, 1); // Shape moved.
+
+        // Object.create
+        {
+          function Parent() {}
+
+          function ParentFactory() {
+            Parent.call(this);
+          }
+
+          ParentFactory.prototype = Object.create(Parent.prototype);
+
+          ParentFactory.prototype.create = function () {
+            console.log(this.constructor); // Parent() {}
+            return new this.constructor();
+          };
+
+          console.log(new ParentFactory().create()); // Parent() {}
+          console.log(ParentFactory.constructor); // Parent() {}
+        }
+
+        // inheritance
+        {
+          try {
+            const obj = Object.create(null); // no prototype
+            obj.key = 'value';
+
+            console.log('null prototype', Object.getPrototypeOf(obj)); // null
+            console.log(
+              'call object prototype',
+              Object.hasOwnProperty.call(obj, 'key')
+            ); // true
+
+            // obj can't use hasOwnProperty
+            console.log('call object prototype', obj.hasOwnProperty('key')); // true
+          } catch (e) {
+            console.log(e);
+          }
+
+          function Rectangle() {
+            Shape.call(this);
+          }
+
+          Rectangle.prototype = Object.create(Shape.prototype, {
+            constructor: {
+              value: Rectangle,
+              enumerable: false,
+              writable: true,
+              configurable: true,
+            },
+            rect: {
+              value: 100,
+              configurable: true,
+              writeable: true,
+            },
+            size: {
+              configurable: false,
+              get() {
+                console.log('rect.get', this.rect);
+                return this.rect;
+              },
+              set(value) {
+                this.rect = value;
+              },
+            },
+          });
+
+          const rect = new Rectangle();
+
+          console.log(
+            'rect is instance of Rectangle',
+            rect instanceof Rectangle
+          ); // true
+          console.log('rect is instance of Shape', rect instanceof Shape); // true
+
+          const size = rect.size;
+          rect.move(1, 1); // 'Shape moved'
+
+          // object literal inheritance
+          {
+            const parent = {
+              familyname: 'Doe',
+            };
+
+            const child = {
+              lastname: 'Jhon',
+              sayName: function () {
+                console.log(this.lastname, this.familyname);
+              },
+              __proto__: parent,
+            };
+
+            child.sayName(); // Doe Jhon
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

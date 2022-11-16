@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>autocomplete</title>
+    <style>
+      div {
+        border: 0;
+        margin: 0;
+      }
+
+      .container {
+        position: relative;
+        width: 640px;
+        height: 480px;
+        margin: 0 auto;
+        display: flex;
+      }
+
+      .button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 60px;
+        height: 100%;
+      }
+
+      .button button {
+        cursor: pointer;
+      }
+
+      .carousel {
+        width: calc(640px - 120px);
+        overflow: hidden;
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        padding-left: calc((640px - 120px - 400px) / 2);
+      }
+
+      .slider {
+        background-color: green;
+        display: flex;
+        transition: 0.3s ease-in-out;
+        will-change: transform;
+      }
+
+      .slider :nth-child(1) {
+        background-color: #00ff00;
+        left: 0;
+      }
+
+      .slider :nth-child(2) {
+        background-color: grey;
+      }
+
+      .slider :nth-child(3) {
+        background-color: magenta;
+      }
+
+      .slider :nth-child(3) {
+        background-color: brown;
+      }
+
+      .slide {
+        width: 400px;
+        height: 300px;
+        flex-grow: 1;
+      }
+    </style>
+    <script src="main.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="button prev">
+        <button>prev</button>
+      </div>
+      <div class="carousel">
+        <div class="slider">
+          <div class="slide"></div>
+          <div class="slide"></div>
+          <div class="slide"></div>
+          <div class="slide"></div>
+        </div>
+      </div>
+      <div class="button next">
+        <button>next</button>
+      </div>
+    </div>
+  </body>
+  <script>
+    var $ = document;
+
+    const context = {
+      current: 0,
+    };
+
+    const prev = $.querySelector('.prev');
+    const next = $.querySelector('.next');
+    const slider = $.querySelector('.slider');
+
+    function slide(move) {
+      const index = context.current + move;
+
+      if (index < 0 || index > 3) {
+        return;
+      }
+
+      context.current = index;
+      const x = context.current * 400;
+
+      slider.style.transform = `translateX(${x}px)`;
+    }
+
+    function throttle(handler, delay) {
+      let tid = null;
+
+      return function () {
+        if (!tid) {
+          handler();
+          tid = setTimeout(() => {
+            tid = null;
+          }, delay);
+        }
+      };
+    }
+
+    next.addEventListener(
+      'click',
+      throttle(() => {
+        slide(1);
+      }, 300)
+    );
+
+    prev.addEventListener(
+      'click',
+      throttle(() => {
+        slide(-1);
+      }, 300)
+    );
+  </script>
+</html>

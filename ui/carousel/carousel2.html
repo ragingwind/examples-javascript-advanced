@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>infinite carousel</title>
+    <style>
+      div {
+        border: 0;
+        margin: 0;
+      }
+
+      .container {
+        position: relative;
+        width: 640px;
+        height: 480px;
+        margin: 0 auto;
+        display: flex;
+      }
+
+      .button {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        width: 60px;
+        height: 100%;
+      }
+
+      .button button {
+        cursor: pointer;
+      }
+
+      .carousel {
+        width: calc(640px - 120px);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        background-color: darkgray;
+        border: 1px solid black;
+      }
+
+      .slider {
+        position: relative;
+        display: flex;
+        flex-grow: 1;
+        will-change: transform;
+        height: 300px;
+      }
+
+      .slide {
+        width: 400px;
+        height: 300px;
+        flex-grow: 1;
+        box-sizing: border-box;
+        border: 2px solid black;
+        margin-right: 2px;
+        background-color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+    <script src="main.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="button prev">
+        <button>prev</button>
+      </div>
+      <div class="carousel">
+        <div class="slider"></div>
+      </div>
+      <div class="button next">
+        <button>next</button>
+      </div>
+    </div>
+  </body>
+  <script>
+    var $ = document;
+
+    const context = {
+      current: 2,
+      count: 4,
+    };
+
+    const prev = $.querySelector('.prev');
+    const next = $.querySelector('.next');
+    const slider = $.querySelector('.slider');
+
+    function createSlide(i, style) {
+      const slide = $.createElement('div');
+      slide.className = `slide slide-${i}${style ? ' ' + style : ''}`;
+
+      const h1 = $.createElement('h1');
+      h1.textContent = i;
+
+      slide.appendChild(h1);
+
+      return slide;
+    }
+
+    function createSlides(count) {
+      for (let i = 0; i < count; ++i) {
+        slider.appendChild(createSlide(i));
+      }
+
+      slider.prepend(createSlide(count - 1, 'holder'));
+      slider.prepend(createSlide(count - 2, 'holder'));
+      slider.appendChild(createSlide(0, 'holder'));
+      slider.appendChild(createSlide(1, 'holder'));
+    }
+
+    function translateSlides(padding, transition) {
+      const x = context.current * 400 - padding;
+      slider.style.transition = transition ?? '';
+      slider.style.transform = `translate3d(${-x}px, 0, 0)`;
+    }
+
+    function slide(move) {
+      context.current += move;
+
+      const padding = (640 - 120 - 400) / 2 - 2 * Math.abs(context.current);
+
+      translateSlides(padding, `transform 0.3s ease-in-out`);
+
+      setTimeout(() => {
+        if (context.current >= context.count + 2) {
+          context.current = 2;
+        } else if (context.current < 2) {
+          context.current = context.count + 1;
+        }
+
+        translateSlides(padding);
+      }, 300);
+    }
+
+    createSlides(context.count);
+    translateSlides((640 - 120 - 400) / 2);
+
+    next.addEventListener('click', () => slide(1));
+    prev.addEventListener('click', () => slide(-1));
+  </script>
+</html>

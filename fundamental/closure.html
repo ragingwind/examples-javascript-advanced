@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>context</title>
+  </head>
+  <body>
+    <script>
+      // closure is a function that has access to its outer function's variables.
+      // closure is the combination of a function and the lexical environment within
+      // which that function was declared.
+      {
+        const x = 1;
+        function outer() {
+          const x = 20;
+
+          // create a lexical scope for inner function to access
+          // outer function's variables. where the function is
+          // declared by calling outer function.
+          function inner() {
+            console.log('inner', x); // x is 20
+          }
+
+          inner();
+          outer1();
+        }
+
+        // create a lexical scope for outer1 function to access
+        // global variables. where the function is declared and examined.
+        function outer1() {
+          console.log('outer1', x); // x is 1
+        }
+
+        outer(); // 20
+      }
+
+      // [[Environment]], Environment Record, Outer Environment Reference
+      // https://tc39.es/ecma262/#sec-environment-records
+      {
+        // 1. global execution context for outer is created
+        // 2. global lexical environment for outer is created
+        // 2.1 `global environment record` for outer is created
+        // 2.1.1 object environment record for outer is created: outer(), outer1()
+        // 2.1.1.1 outer function object is created
+        // 2.1.1.1.1 [[Environment]] is set to global lexical environment for outer
+        // 2.1.2 declarative environment record for outer is created: x = 1
+        const GlobalLexicalEnvironment = {
+          EnvironmentRecord: {
+            ObjectEnvironmentRecord: {
+              BindingObject: {
+                window: {
+                  outer: 'outer.[[Environment]]',
+                  outer1: 'outer1.[[Environment]]',
+                },
+              },
+            },
+            DeclarativeEnvironmentRecord: {
+              x: 20,
+            },
+          },
+          OuterLexicalEnvironmentRef: null,
+        };
+        const x = 1;
+
+        // 3. function execution context for outer is created
+        // 4. `function lexical environment` for outer is created
+        // 4.1 `function environment record` for outer is created: x = 20
+        // 5. this binding for outer is created: this === globalThis
+        // 6. `outer lexical environment` reference for outer is created: global lexical environment
+        function outer() {
+          const FunctionLexicalEnvironment = {
+            FunctionEnvironmentRecord: {
+              x: undefined,
+            },
+            OuterLexicalEnvironmentRef: GlobalLexicalEnvironment,
+            '[[Environment]]': GlobalLexicalEnvironment,
+          };
+
+          const x = 20;
+
+          outer1();
+        }
+
+        // 2.1.1.2 outer1 function object is created
+        // 2.1.1.2.1 [[Environment]] is set to global lexical environment for outer1
+        function outer1() {
+          const FunctionLexicalEnvironment = {
+            EnvironmentRecord: {},
+            OuterLexicalEnvironmentRef: GlobalLexicalEnvironment,
+            '[[Environment]]': GlobalLexicalEnvironment,
+          };
+
+          console.log('outer1', x); // x is 1
+        }
+
+        outer(); // 1
+      }
+
+      // closure and lexical
+      {
+        const GlobalLexicalEnvironment = {
+          EnvironmentRecord: {
+            ObjectEnvironmentRecord: {
+              BindingObject: {
+                window: {
+                  outer: 'outer()',
+                },
+              },
+            },
+            DeclarativeEnvironmentRecord: {
+              x: undefined,
+            },
+          },
+          OuterLexicalEnvironmentRef: null,
+        };
+
+        const x = 1;
+
+        function outer() {
+          // '[[Environment]]' is created when the function is declared
+          // and it is set to window object as a method
+          const InnerSlot = {
+            '[[Environment]]': GlobalLexicalEnvironment,
+          };
+
+          const OuterFunctionLexicalEnvironment = {
+            FunctionEnvironmentRecord: {
+              x: undefined,
+              inner: 'inner()',
+            },
+            OuterLexicalEnvironmentRef: GlobalLexicalEnvironment,
+          };
+          const x = 10;
+
+          const inner = function () {
+            // '[[Environment]]' is created when the function is declared
+            // and it is set to window object as a method
+            const InnerSlot = {
+              '[[Environment]]': OuterFunctionLexicalEnvironment,
+            };
+
+            const InnerFunctionLexicalEnvironment = {
+              FunctionEnvironmentRecord: {},
+              // refer to outer function's lexical environment to access x
+              OuterLexicalEnvironmentRef: OuterFunctionLexicalEnvironment,
+            };
+
+            // debugger;
+            // Local:
+            //   this: Window
+            //   InnerSlot: { [[Environment]]: {… } }
+            //   InnerFunctionLexicalEnvironment: { FunctionEnvironmentRecord: {… }, OuterLexicalEnvironmentRef: {… } }
+            // Closure(outer)
+            //   OuterFunctionLexicalEnvironment: { FunctionEnvironmentRecord: {… }, OuterLexicalEnvironmentRef: {… } }
+            //   x : 10 // outer function's x
+            // Block
+            //   GlobalLexicalEnvironment: { EnvironmentRecord: {… }, OuterLexicalEnvironmentRef: null }
+            console.log('inner scoped x', x);
+          };
+          return inner;
+        }
+
+        // 1. outer function is called and outer execution context is created
+        const innerFn = outer();
+        // 2. outer execution context is popped off the stack
+        // 3. inner function is called and inner execution context is created
+        innerFn(); // 10
+      }
+
+      // closure for hiding information
+      {
+        const increase = (function () {
+          const IIFELexicalEnvironment = {
+            FunctionEnvironmentRecord: {
+              num: 0,
+            },
+            OuterLexicalEnvironmentRef: 'GlobalFunctionLexicalEnvironment',
+          };
+          // hiding variable from outside
+          let num = 0;
+
+          return function () {
+            const InnerFunctionLexicalEnvironment = {
+              OuterLexicalEnvironmentRef: IIFELexicalEnvironment,
+            };
+            // scoped num
+            return ++num;
+          };
+        })();
+
+        console.log(increase()); // 1
+        console.log(increase()); // 2
+        console.log(increase()); // 3
+      }
+
+      // closure for hiding information
+      {
+        const counter = (function () {
+          let counter = 0;
+
+          return function (aux) {
+            counter = aux(counter);
+            return counter;
+          };
+        })();
+
+        function increase(num) {
+          return ++num;
+        }
+
+        function decrease(num) {
+          return --num;
+        }
+
+        console.log(counter(increase)); // 1
+        console.log(counter(increase)); // 2
+        console.log(counter(decrease)); // 1
+        console.log(counter(decrease)); // 0
+      }
+
+      // private data with closure
+      {
+        const Person = (function () {
+          // private property shared
+          let _age = 0;
+
+          function Person(name, age) {
+            this.name = name; // public
+            _age = age;
+
+            // instance method, will be created every time
+            this.sayHello = function () {
+              console.log(
+                `#1> Hello, I'm ${this.name} and I'm ${_age} years old.`
+              );
+            };
+          }
+
+          Person.prototype.sayHello2 = function () {
+            console.log(
+              `#1> Hello2, my name is ${this.name} and I'm ${_age} years old.`
+            );
+          };
+
+          return Person;
+        })();
+
+        const me = new Person('Moon', 20);
+        me.sayHello(); // 20
+        me.sayHello2(); // 20
+
+        const me2 = new Person('Moon', 30);
+        me2.sayHello(); // 30
+        me2.sayHello2(); // 30
+
+        me.sayHello(); // 30
+        me.sayHello2(); // 30
+      }
+
+      // private field with closure
+      {
+        const Person = (function () {
+          // private property shared map
+          const _ages = new WeakMap();
+
+          function Person(name, age) {
+            this.name = name; // public
+            _ages.set(this, age);
+
+            // instance method, will be created every time
+            this.sayHello = function () {
+              console.log(
+                `#2> Hello, I'm ${this.name} and I'm ${_ages.get(
+                  this
+                )} years old.`
+              );
+            };
+          }
+
+          Person.prototype.sayHello2 = function () {
+            console.log(
+              `#2> Hello2, my name is ${this.name} and I'm ${_ages.get(
+                this
+              )} years old.`
+            );
+          };
+
+          return Person;
+        })();
+
+        const me = new Person('Moon', 20);
+        me.sayHello(); // 20
+        me.sayHello2(); // 20
+
+        const me2 = new Person('Moon', 30);
+        me2.sayHello(); // 30
+        me2.sayHello2(); // 30
+
+        me.sayHello(); // 20
+        me.sayHello2(); // 20
+      }
+
+      // private field with class
+      {
+        class Person {
+          #age = 0;
+          name = '';
+          constructor(name, age) {
+            this.#age = age; // private
+            this.name = name; // public
+          }
+
+          sayHello() {
+            console.log(
+              `#3> Hello, I'm ${this.name} and I'm ${this.#age} years old.`
+            );
+          }
+        }
+
+        const me = new Person('Moon', 20);
+        me.sayHello(); // 20
+
+        const me2 = new Person('Moon', 30);
+        me2.sayHello(); // 30
+
+        me.sayHello(); // 20
+      }
+
+      // mistake in closure
+      {
+        {
+          var func = [];
+          for (var i = 0; i < 3; i++) {
+            // i is global variable
+            func[i] = function () {
+              return i; // refer same scoped i increased 3
+            };
+          }
+
+          console.log(func.map((f) => f()).join(', '));
+        }
+
+        {
+          var func = [];
+          for (var i = 0; i < 3; i++) {
+            func[i] = (function (id) {
+              // create new scope for each iteration with argument
+              return function () {
+                return id;
+              };
+            })(i);
+          }
+
+          console.log(func.map((f) => f()).join(', '));
+        }
+
+        {
+          var func = [];
+          for (let i = 0; i < 3; i++) {
+            // i is block scoped variable
+            func[i] = function () {
+              return i;
+            };
+          }
+
+          console.log(func.map((f) => f()).join(', '));
+        }
+      }
+    </script>
+  </body>
+</html>
